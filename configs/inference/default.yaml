@@ -1,0 +1,13 @@
+# Inference / evaluation defaults.
+
+checkpoint: runs/best.pt
+batch_size: 1
+num_workers: 2
+
+# Post-processing (placeholders — implement in glioma_seg.inference.postprocess).
+postprocess:
+  enabled: false
+  min_component_size: 50     # Remove ET components smaller than this many voxels.
+
+tta:
+  enabled: false             # Test-time augmentation (flips).

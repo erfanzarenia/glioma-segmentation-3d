@@ -1,0 +1,10 @@
+# BraTS 2021 dataset paths and split.
+# Two modalities used (FLAIR + T1ce); labels are merged into
+# {0: background, 1: non-enhancing + edema, 2: enhancing}.
+
+name: brats2021
+raw_dir: data/raw/BraTS2021
+processed_dir: data/processed
+split_ratio: [0.8, 0.1, 0.1]
+modalities: [flair, t1ce]
+num_classes: 3

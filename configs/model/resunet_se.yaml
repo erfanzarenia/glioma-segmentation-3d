@@ -1,0 +1,9 @@
+# Residual + Squeeze-and-Excitation U-Net (3D).
+# Maps directly to glioma_seg.models.resunet_se.ReSE_UNet3D.
+
+name: resunet_se
+input_channels: 2
+output_channels: 3
+dropout_rate: 0.15
+dropout_scaling: true
+gradient_checkpointing: true

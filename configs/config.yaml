@@ -1,0 +1,20 @@
+# Root Hydra config. Override anything from the CLI, e.g.:
+#   python scripts/train.py training.epochs=200 model.dropout_rate=0.1
+
+defaults:
+  - model: resunet_se
+  - data: brats2021
+  - training: default
+  - inference: default
+  - _self_
+
+seed: 42
+device: cuda
+output_dir: runs/${now:%Y-%m-%d_%H-%M-%S}
+
+hydra:
+  run:
+    dir: ${output_dir}
+  sweep:
+    dir: multirun/${now:%Y-%m-%d_%H-%M-%S}
+    subdir: ${hydra.job.num}
