@@ -1,0 +1,6 @@
+# Treat notebooks as text for diffing (lightly)
+*.ipynb text
+
+# Large binary sample data via Git LFS if you ever commit any
+*.nii.gz filter=lfs diff=lfs merge=lfs -text
+*.pt     filter=lfs diff=lfs merge=lfs -text

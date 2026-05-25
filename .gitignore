@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+build/
+dist/
+*.egg-info/
+
+# Virtual envs
+.venv/
+venv/
+
+# Test / lint caches
+.pytest_cache/
+.ruff_cache/
+.coverage
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Data and run artefacts
+data/
+runs/
+multirun/
+outputs/
+*.nii
+*.nii.gz
+*.pt
+*.pth
+*.ckpt
+
+# Allow the published checkpoint
+!checkpoints/best.pt
+
+# Environment
+.env

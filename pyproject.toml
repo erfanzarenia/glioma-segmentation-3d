@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "glioma-seg"
+version = "0.1.0"
+description = "Residual-SE U-Net for 3D brain glioma segmentation on BraTS 2021."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "Erfan Zarenia" }]
+keywords = ["medical-imaging", "segmentation", "u-net", "brats", "pytorch"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+]
+dynamic = ["dependencies"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "ruff>=0.1.14",
+]
+
+[project.urls]
+Repository = "https://github.com/USER/brain-glioma-segmentation"
+Issues     = "https://github.com/USER/brain-glioma-segmentation/issues"
+
+[project.scripts]
+glioma-train      = "scripts.train:main"
+glioma-preprocess = "scripts.preprocess:main"
+glioma-evaluate   = "scripts.evaluate:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+extend-exclude = ["data", "runs"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "PL"]
+ignore = ["E501", "PLR0913", "PLR2004"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --strict-markers"
+testpaths = ["tests"]
