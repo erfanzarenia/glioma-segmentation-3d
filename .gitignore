@@ -34,7 +34,7 @@ outputs/
 *.ckpt
 
 # Allow the published checkpoint
-!checkpoints/best.pt
+!checkpoints/*.pt
 
 # Environment
 .env
