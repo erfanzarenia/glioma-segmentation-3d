@@ -139,10 +139,15 @@ python scripts/train.py
 python scripts/train.py training.epochs=200 model.dropout_rate=0.1
 ```
 
-**Evaluate a checkpoint**
+**Evaluate the bundled checkpoint**
+
+The reference checkpoint (`checkpoints/model_epoch150.pt`, ~30 MB) is included
+in the repo and used by default.
 
 ```bash
-python scripts/evaluate.py checkpoint=runs/best.pt
+python scripts/evaluate.py
+# or point at a different checkpoint
+python scripts/evaluate.py inference.checkpoint=path/to/your.pt
 ```
 
 ## Repository layout
@@ -159,6 +164,7 @@ glioma-segmentation-3d/
 ├── scripts/              # Thin CLI entry points (preprocess, train, evaluate)
 ├── tests/                # Unit tests (shape / forward-pass)
 ├── assets/               # Figures used in README
+├── checkpoints/          # Reference trained model
 └── docs/                 # Methodology, experiment notes
 ```
 

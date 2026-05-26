@@ -2,7 +2,8 @@
 
 Example
 -------
-    python scripts/evaluate.py inference.checkpoint=runs/best.pt
+    python scripts/evaluate.py
+    python scripts/evaluate.py inference.checkpoint=path/to/your.pt
 """
 
 import hydra

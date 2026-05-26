@@ -1,6 +1,6 @@
 # Inference / evaluation defaults.
 
-checkpoint: runs/best.pt
+checkpoint: checkpoints/model_epoch150.pt
 batch_size: 1
 num_workers: 2
 
