@@ -1,6 +1,5 @@
 # Brain Glioma Segmentation — Residual-SE U-Net (3D, Multi-Modal MRI)
 
-[![CI](https://github.com/USER/brain-glioma-segmentation/actions/workflows/ci.yml/badge.svg)](https://github.com/USER/brain-glioma-segmentation/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch 2.1+](https://img.shields.io/badge/pytorch-2.1+-ee4c2c.svg)](https://pytorch.org/)
@@ -112,8 +111,8 @@ Axial mid-slice of three test subjects, FLAIR vs. ground truth vs. prediction.
 ## Installation
 
 ```bash
-git clone https://github.com/USER/brain-glioma-segmentation.git
-cd brain-glioma-segmentation
+git clone https://github.com/erfanzarenia/glioma-segmentation-3d.git
+cd glioma-segmentation-3d
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 ```
@@ -149,7 +148,7 @@ python scripts/evaluate.py checkpoint=runs/best.pt
 ## Repository layout
 
 ```
-brain-glioma-segmentation/
+glioma-segmentation-3d/
 ├── configs/              # Hydra configs (model, data, training, inference)
 ├── src/glioma_seg/       # Importable package
 │   ├── data/             # Dataset, transforms, preprocessing, I/O
@@ -181,7 +180,7 @@ If you reference this code, please cite:
   author = {Zarenia, Erfan},
   title  = {Residual-SE U-Net for 3D Brain Glioma Segmentation},
   year   = {2025},
-  howpublished = {\url{https://github.com/USER/brain-glioma-segmentation}}
+  howpublished = {\url{https://github.com/erfanzarenia/glioma-segmentation-3d}}
 }
 ```
 
