@@ -8,12 +8,11 @@ Example
 
 import hydra
 import torch
-from monai.losses import DiceFocalLoss
 from omegaconf import DictConfig, OmegaConf
 
 from glioma_seg.inference import Evaluator
 from glioma_seg.models import ReSE_UNet3D
-from glioma_seg.training import DataManager
+from glioma_seg.training import DataManager, build_loss
 from glioma_seg.utils.logging import get_logger
 from glioma_seg.utils.seed import set_seed
 
@@ -49,21 +48,16 @@ def main(cfg: DictConfig) -> None:
     else:
         model.load_state_dict(state)
 
-    loss_fn = DiceFocalLoss(
-        include_background=cfg.training.loss.include_background,
-        to_onehot_y=cfg.training.loss.to_onehot_y,
-        softmax=cfg.training.loss.softmax,
-        lambda_dice=cfg.training.loss.lambda_dice,
-        lambda_focal=cfg.training.loss.lambda_focal,
-        gamma=cfg.training.loss.focal_gamma,
-    )
+    loss_fn = build_loss(cfg.training.loss)
 
-    evaluator = Evaluator(model=model, loss_func=loss_fn)
+    evaluator = Evaluator(model=model, loss_func=loss_fn, device=cfg.device)
     avg_loss, dice, hd95 = evaluator.evaluate(test_loader, average_metric=False)
 
     log.info("Test loss : %.4f", avg_loss)
-    log.info("Dice (per class) : %s", dice.tolist())
-    log.info("HD95 (per class) : %s", hd95.tolist())
+    for name, d, h in zip(
+        ("NE+edema (class 1)", "Enhancing (class 2)"), dice.tolist(), hd95.tolist(), strict=True
+    ):
+        log.info("%-20s Dice=%.4f  HD95=%.2f", name, d, h)
 
 
 if __name__ == "__main__":

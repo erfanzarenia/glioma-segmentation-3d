@@ -5,7 +5,7 @@ from monai.metrics import DiceMetric, HausdorffDistanceMetric
 from monai.networks.utils import one_hot
 from tqdm import tqdm
 
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+from glioma_seg.utils.device import resolve_device
 
 
 class Evaluator:
@@ -16,14 +16,18 @@ class Evaluator:
     - Dice score (per-class or mean).
     - 95th-percentile Hausdorff distance (per-class or mean).
     - Mean loss across the dataset.
+
+    ``device="auto"`` (default) uses CUDA when available, otherwise the CPU.
     """
 
     def __init__(
         self,
         model: torch.nn.Module,
         loss_func: torch.nn.Module,
+        device: str | torch.device | None = "auto",
     ):
-        self.model = model.to(DEVICE)
+        self.device = resolve_device(device)
+        self.model = model.to(self.device)
         self.loss_fn = loss_func
 
     def evaluate(self, loader: torch.utils.data.DataLoader, average_metric: bool = True):
@@ -59,8 +63,8 @@ class Evaluator:
         )
 
         with torch.no_grad():
-            for x, y in tqdm(loader, desc="Evaluate"):
-                x, y = x.to(DEVICE), y.to(DEVICE)
+            for images, labels in tqdm(loader, desc="Evaluate"):
+                x, y = images.to(self.device), labels.to(self.device)
 
                 out = self.model(x)
                 loss = self.loss_fn(out, y)

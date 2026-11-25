@@ -10,7 +10,6 @@ import os
 
 import hydra
 import torch
-from monai.losses import DiceFocalLoss
 from omegaconf import DictConfig, OmegaConf
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import ReduceLROnPlateau
@@ -18,7 +17,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from glioma_seg.data import Augmenter
 from glioma_seg.inference import Evaluator
 from glioma_seg.models import ReSE_UNet3D
-from glioma_seg.training import DataManager, Trainer
+from glioma_seg.training import DataManager, Trainer, build_loss
 from glioma_seg.utils.logging import get_logger
 from glioma_seg.utils.seed import set_seed
 
@@ -30,18 +29,6 @@ def build_model(cfg: DictConfig) -> torch.nn.Module:
         dropout_rate=cfg.model.dropout_rate,
         dropout_scaling=cfg.model.dropout_scaling,
         gradient_checkpointing=cfg.model.gradient_checkpointing,
-    )
-
-
-def build_loss(cfg: DictConfig) -> torch.nn.Module:
-    loss_cfg = cfg.training.loss
-    return DiceFocalLoss(
-        include_background=loss_cfg.include_background,
-        to_onehot_y=loss_cfg.to_onehot_y,
-        softmax=loss_cfg.softmax,
-        lambda_dice=loss_cfg.lambda_dice,
-        lambda_focal=loss_cfg.lambda_focal,
-        gamma=loss_cfg.focal_gamma,
     )
 
 
@@ -72,7 +59,7 @@ def main(cfg: DictConfig) -> None:
 
     # --- Model / loss / optim ----------------------------------------------
     model = build_model(cfg)
-    loss_fn = build_loss(cfg)
+    loss_fn = build_loss(cfg.training.loss)
     optimizer = AdamW(
         model.parameters(),
         lr=cfg.training.optimizer.lr,
@@ -91,8 +78,10 @@ def main(cfg: DictConfig) -> None:
         scheduler=scheduler,
         loss_func=loss_fn,
         accumulation_steps=cfg.training.accumulation_steps,
+        device=cfg.device,
+        amp=cfg.training.amp,
     )
-    evaluator = Evaluator(model=model, loss_func=loss_fn)
+    evaluator = Evaluator(model=model, loss_func=loss_fn, device=cfg.device)
 
     # --- Loop --------------------------------------------------------------
     history = {"epoch": [], "training_loss": [], "validation_loss": [], "dice_score": []}
@@ -126,7 +115,7 @@ def main(cfg: DictConfig) -> None:
                     },
                     ckpt_path,
                 )
-                log.info("  ↑ new best (Dice=%.4f) — saved to %s", dice_val, ckpt_path)
+                log.info("  ↑ new best (Dice=%.4f), saved to %s", dice_val, ckpt_path)
 
     # Always save the final checkpoint + training history.
     torch.save(model.state_dict(), os.path.join(cfg.output_dir, "last.pt"))

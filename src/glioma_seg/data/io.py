@@ -7,6 +7,11 @@ import numpy as np
 import torch
 
 
+def list_subjects(raw_dir):
+    """Return the sorted subject folder names in ``raw_dir`` (files are ignored)."""
+    return sorted(d for d in os.listdir(raw_dir) if os.path.isdir(os.path.join(raw_dir, d)))
+
+
 class DataExtractor:
     """Load raw NIfTI volumes (FLAIR, T1ce, segmentation) for a subject.
 
@@ -58,7 +63,7 @@ class DataSaver:
     """Save preprocessed data and labels into train/val/test splits.
 
     The split is determined by the sample index and the total number of raw
-    subjects (i.e., a sorted, deterministic split — not randomised).
+    subjects (i.e., a sorted, deterministic split, not randomised).
     """
 
     def __init__(self, raw_dir, output_dir, split_ratio=(0.8, 0.1, 0.1)):
@@ -66,9 +71,7 @@ class DataSaver:
         self.raw_dir = raw_dir
         self.split_ratio = split_ratio
 
-        self.total_samples = len(
-            [d for d in os.listdir(self.raw_dir) if os.path.isdir(os.path.join(self.raw_dir, d))]
-        )
+        self.total_samples = len(list_subjects(self.raw_dir))
 
     def save(self, idx, data, label):
         """Save ``data`` and ``label`` as torch tensors in the appropriate split.

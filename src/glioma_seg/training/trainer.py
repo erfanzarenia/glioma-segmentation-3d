@@ -6,11 +6,23 @@ from torch.optim import Optimizer
 from torch.optim.lr_scheduler import _LRScheduler
 from tqdm import tqdm
 
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+from glioma_seg.utils.device import resolve_device
 
 
 class Trainer:
-    """Single-epoch training loop with mixed precision and gradient accumulation."""
+    """Single-epoch training loop with mixed precision and gradient accumulation.
+
+    Parameters
+    ----------
+    accumulation_steps : int
+        Number of mini-batches whose gradients are summed before each
+        optimizer step (effective batch = batch size x accumulation steps).
+    device : str or torch.device, optional
+        ``"auto"`` (default) uses CUDA when available, otherwise the CPU.
+    amp : bool
+        Mixed precision via ``torch.amp.autocast``. Loss scaling with
+        ``GradScaler`` is only active on CUDA.
+    """
 
     def __init__(
         self,
@@ -19,13 +31,17 @@ class Trainer:
         scheduler: _LRScheduler,
         loss_func: torch.nn.Module,
         accumulation_steps: int,
+        device: str | torch.device | None = "auto",
+        amp: bool = True,
     ):
-        self.model = model.to(DEVICE)
+        self.device = resolve_device(device)
+        self.model = model.to(self.device)
         self.opt = optimizer
         self.sched = scheduler
         self.loss_fn = loss_func
         self.accum = accumulation_steps
-        self.scaler = GradScaler()
+        self.amp = amp
+        self.scaler = GradScaler(self.device.type, enabled=amp and self.device.type == "cuda")
 
     def train(self, loader: torch.utils.data.DataLoader):
         """Run one full training epoch and return the mean loss."""
@@ -33,10 +49,10 @@ class Trainer:
         self.opt.zero_grad()
         total_loss = 0.0
 
-        for step, (x, y) in enumerate(tqdm(loader, desc="Train")):
-            x, y = x.to(DEVICE), y.to(DEVICE)
+        for step, (images, labels) in enumerate(tqdm(loader, desc="Train")):
+            x, y = images.to(self.device), labels.to(self.device)
 
-            with autocast(device_type=DEVICE.type):
+            with autocast(device_type=self.device.type, enabled=self.amp):
                 out = self.model(x)
                 loss = self.loss_fn(out, y)
                 total_loss += loss.item()

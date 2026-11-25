@@ -5,15 +5,18 @@ import sys
 
 
 def get_logger(name: str = "glioma_seg", level: int = logging.INFO) -> logging.Logger:
-    """Return a configured stdout logger.
+    """Return a logger that prints to stdout.
 
-    Idempotent — calling repeatedly will not stack handlers.
+    If the root logger is already configured (as it is inside a Hydra job,
+    which also writes ``<run dir>/<script>.log``), messages propagate to it.
+    Otherwise a stdout handler is attached. Idempotent: calling repeatedly
+    will not stack handlers.
     """
     logger = logging.getLogger(name)
-    if logger.handlers:
+    logger.setLevel(level)
+    if logger.handlers or logging.getLogger().handlers:
         return logger
 
-    logger.setLevel(level)
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(
         logging.Formatter("[%(asctime)s] %(levelname)s %(name)s: %(message)s", "%H:%M:%S")

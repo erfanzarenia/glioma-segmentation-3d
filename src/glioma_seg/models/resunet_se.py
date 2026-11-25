@@ -1,7 +1,7 @@
 """3D Residual + Squeeze-and-Excitation U-Net architecture."""
 
 import torch
-import torch.nn as nn
+from torch import nn
 from torch.utils.checkpoint import checkpoint
 
 from glioma_seg.models.blocks import Residual_SE_Block3D

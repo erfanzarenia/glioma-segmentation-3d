@@ -41,8 +41,12 @@ class Augmenter:
                     keys=["image", "label"],
                     prob=self.affined_prob,
                     rotate_range=(0.17, 0.17, 0.17),  # ~10° in radians
-                    scale_range=(0.9, 1.1),  # ±10%
+                    # MONAI adds 1.0 to the sampled value, so 0.1 per axis gives a
+                    # scale factor in [0.9, 1.1] (±10%).
+                    scale_range=(0.1, 0.1, 0.1),
                     translate_range=(10, 10, 10),  # ±10 voxels
+                    # Nearest-neighbour for the label so it stays a valid class map.
+                    mode=("bilinear", "nearest"),
                 ),
                 # ------ Intensity Augmentations ------
                 RandScaleIntensityd(keys="image", factors=0.1, prob=0.5),

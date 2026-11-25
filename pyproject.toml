@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,14 +8,15 @@ version = "0.1.0"
 description = "Residual-SE U-Net for 3D brain glioma segmentation on BraTS 2021."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { file = "LICENSE" }
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [{ name = "Erfan Zarenia" }]
 keywords = ["medical-imaging", "segmentation", "u-net", "brats", "pytorch"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.12",
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Scientific/Engineering :: Medical Science Apps.",
@@ -33,11 +34,6 @@ dev = [
 Repository = "https://github.com/erfanzarenia/glioma-segmentation-3d"
 Issues     = "https://github.com/erfanzarenia/glioma-segmentation-3d/issues"
 
-[project.scripts]
-glioma-train      = "scripts.train:main"
-glioma-preprocess = "scripts.preprocess:main"
-glioma-evaluate   = "scripts.evaluate:main"
-
 [tool.setuptools.packages.find]
 where = ["src"]
 
@@ -51,7 +47,7 @@ extend-exclude = ["data", "runs"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "SIM", "PL"]
-ignore = ["E501", "PLR0913", "PLR2004"]
+ignore = ["E501", "PLR0913", "PLR0917", "PLR2004"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"

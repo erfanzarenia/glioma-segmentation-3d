@@ -14,7 +14,7 @@ def device() -> torch.device:
 def tiny_volume() -> torch.Tensor:
     """A synthetic 2-channel volume sized for the U-Net's 3-stage downsampling.
 
-    Shape is ``(1, 2, 32, 32, 32)`` — divisible by 8 so all pooling/upsampling
+    Shape is ``(1, 2, 32, 32, 32)``, divisible by 8 so all pooling/upsampling
     stages line up.
     """
     return torch.randn(1, 2, 32, 32, 32)

@@ -9,7 +9,12 @@ from glioma_seg.data.dataset import BraTSDataset
 
 
 class DataManager:
-    """Prepares ``DataLoader``s for BraTS 2021 with optional on-the-fly 3D augments."""
+    """Prepares ``DataLoader``s for BraTS 2021 with optional on-the-fly 3D augments.
+
+    ``batch_size`` applies to the training loader only; validation and test
+    loaders always use a batch size of 1. ``transform`` is applied to the
+    training set only.
+    """
 
     def __init__(
         self,
@@ -27,41 +32,27 @@ class DataManager:
         self.prefetch_factor = prefetch_factor
         self.transform = transform
 
-    def get_train_loader(self):
-        """Return a ``DataLoader`` for the training set with augmentation."""
-        train_data = os.path.join(self.processed_dir, "train", "data")
-        train_label = os.path.join(self.processed_dir, "train", "labels")
+    def _loader(self, split: str, batch_size: int, shuffle: bool, transform=None) -> DataLoader:
+        data_dir = os.path.join(self.processed_dir, split, "data")
+        label_dir = os.path.join(self.processed_dir, split, "labels")
         return DataLoader(
-            BraTSDataset(train_data, train_label, transform=self.transform),
-            batch_size=self.batch_size,
-            shuffle=True,
+            BraTSDataset(data_dir, label_dir, transform=transform),
+            batch_size=batch_size,
+            shuffle=shuffle,
             num_workers=self.num_workers,
             pin_memory=self.pin_memory,
-            prefetch_factor=self.prefetch_factor,
+            # PyTorch rejects prefetch_factor when loading in the main process.
+            prefetch_factor=self.prefetch_factor if self.num_workers > 0 else None,
         )
+
+    def get_train_loader(self):
+        """Return a shuffled ``DataLoader`` for the training set with augmentation."""
+        return self._loader("train", self.batch_size, shuffle=True, transform=self.transform)
 
     def get_val_loader(self):
         """Return a ``DataLoader`` for the validation set (no augmentation)."""
-        val_data = os.path.join(self.processed_dir, "val", "data")
-        val_label = os.path.join(self.processed_dir, "val", "labels")
-        return DataLoader(
-            BraTSDataset(val_data, val_label),
-            batch_size=1,
-            shuffle=False,
-            num_workers=self.num_workers,
-            pin_memory=self.pin_memory,
-            prefetch_factor=self.prefetch_factor,
-        )
+        return self._loader("val", 1, shuffle=False)
 
     def get_test_loader(self):
-        """Return a ``DataLoader`` for the test set."""
-        test_data = os.path.join(self.processed_dir, "test", "data")
-        test_label = os.path.join(self.processed_dir, "test", "labels")
-        return DataLoader(
-            BraTSDataset(test_data, test_label),
-            batch_size=1,
-            shuffle=False,
-            num_workers=self.num_workers,
-            pin_memory=self.pin_memory,
-            prefetch_factor=self.prefetch_factor,
-        )
+        """Return a ``DataLoader`` for the test set (no augmentation)."""
+        return self._loader("test", 1, shuffle=False)

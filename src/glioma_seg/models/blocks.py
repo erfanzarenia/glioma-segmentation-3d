@@ -1,7 +1,7 @@
 """Building blocks for the 3D Residual-SE U-Net."""
 
 import torch
-import torch.nn as nn
+from torch import nn
 
 
 class SE_Block(nn.Module):
@@ -71,8 +71,8 @@ class Residual_SE_Block3D(nn.Module):
         ``[C1, C2]`` where:
             - ``C1`` is the number of output channels from the first conv layer.
             - ``C2`` is the final output channel size (after second conv layer and SE block).
-    kernel_sizes : list of int
-        Kernel sizes for the two convolution layers. Default ``[3, 3]``.
+    kernel_sizes : sequence of int
+        Kernel sizes for the two convolution layers. Default ``(3, 3)``.
     use_residual : bool
         If True, adds a residual connection from input to output.
 
@@ -82,7 +82,7 @@ class Residual_SE_Block3D(nn.Module):
         Shape ``[B, C2, D, H, W]`` after convolution, normalization, SE, and optional residual.
     """
 
-    def __init__(self, input_channels, output_channels, kernel_sizes=[3, 3], use_residual=False):
+    def __init__(self, input_channels, output_channels, kernel_sizes=(3, 3), use_residual=False):
         super().__init__()
 
         # Calculate padding
@@ -138,11 +138,8 @@ class Residual_SE_Block3D(nn.Module):
 
         # Add residual (if enabled)
         if self.use_residual:
-            if self.residual:
-                res = self.residual(input)  # Adjust channels if needed
-            else:
-                res = input  # Direct residual connection
-
+            # Project channels with a 1x1x1 conv if needed, else identity.
+            res = self.residual(input) if self.residual else input
             output = conv_2se + res  # Add SE output and residual
 
         # No residual path

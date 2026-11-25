@@ -8,8 +8,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from glioma_seg.data.io import DataExtractor
-
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+from glioma_seg.utils.device import resolve_device
 
 
 class Visualizer:
@@ -26,7 +25,7 @@ class Visualizer:
         subjects = [d for d in os.listdir(raw_dir) if os.path.isdir(os.path.join(raw_dir, d))]
         samples = random.sample(subjects, num_samples)
 
-        fig, axs = plt.subplots(num_samples, 3, figsize=(15, 5 * num_samples))
+        fig, axs = plt.subplots(num_samples, 3, figsize=(15, 5 * num_samples), squeeze=False)
 
         for i, subj in enumerate(samples):
             flair, t1c, label = DataExtractor(raw_dir).load(subj)
@@ -58,7 +57,7 @@ class Visualizer:
 
         idxs = random.sample(range(len(data_files)), num_samples)
 
-        fig, axs = plt.subplots(3, num_samples, figsize=(4 * num_samples, 12))
+        fig, axs = plt.subplots(3, num_samples, figsize=(4 * num_samples, 12), squeeze=False)
 
         for i, idx in enumerate(idxs):
             data = torch.load(os.path.join(train_dir, "data", data_files[idx]))
@@ -74,7 +73,7 @@ class Visualizer:
             axs[1, i].set_title("Modality 2")
             axs[1, i].axis("off")
 
-            axs[2, i].imshow(label[0, :, :, sl], cmap="viridis")
+            axs[2, i].imshow(label[0, :, :, sl], cmap="viridis", vmin=0, vmax=2)
             axs[2, i].set_title(label_files[idx])
             axs[2, i].axis("off")
 
@@ -123,15 +122,18 @@ class Plotter:
         loader: DataLoader,
         num_samples: int = 5,
         slice_index: int = None,
+        device: str | torch.device | None = "auto",
     ):
         """Plot random (image, ground truth, prediction) triples from a loader."""
         dataset = loader.dataset
         picks = random.sample(range(len(dataset)), num_samples)
-        model.to(DEVICE)
+        device = resolve_device(device)
+        model.to(device)
+        model.eval()
 
         for idx in picks:
             data, label = dataset[idx]
-            x = data.unsqueeze(0).to(DEVICE)
+            x = data.unsqueeze(0).to(device)
 
             with torch.no_grad():
                 out = model(x)
@@ -150,11 +152,11 @@ class Plotter:
             axes[0].set_title("Image")
             axes[0].axis("off")
 
-            axes[1].imshow(gt, cmap="jet", alpha=0.6)
+            axes[1].imshow(gt, cmap="jet", alpha=0.6, vmin=0, vmax=2)
             axes[1].set_title("Ground Truth")
             axes[1].axis("off")
 
-            axes[2].imshow(pr, cmap="jet", alpha=0.6)
+            axes[2].imshow(pr, cmap="jet", alpha=0.6, vmin=0, vmax=2)
             axes[2].set_title("Prediction")
             axes[2].axis("off")
 
