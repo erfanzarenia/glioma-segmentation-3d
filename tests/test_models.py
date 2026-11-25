@@ -1,5 +1,7 @@
 """End-to-end forward/backward tests for the Residual-SE U-Net."""
 
+from pathlib import Path
+
 import torch
 
 from glioma_seg.models import ReSE_UNet3D
@@ -62,3 +64,11 @@ def test_gradient_checkpointing_matches_no_checkpointing(tiny_volume):
         out_b = model_b(tiny_volume)
 
     assert out_a.shape == out_b.shape
+    torch.testing.assert_close(out_a, out_b)
+
+
+def test_bundled_checkpoint_loads():
+    """The reference checkpoint shipped in ``checkpoints/`` matches the architecture."""
+    ckpt = Path(__file__).resolve().parents[1] / "checkpoints" / "model_epoch150.pt"
+    model = ReSE_UNet3D(input_channels=2, output_channels=3, gradient_checkpointing=False)
+    model.load_state_dict(torch.load(ckpt, map_location="cpu"))

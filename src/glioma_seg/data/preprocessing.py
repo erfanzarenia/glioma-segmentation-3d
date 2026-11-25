@@ -6,11 +6,9 @@ This module:
       refines labels, and saves preprocessed tensors split into train/val/test.
 """
 
-import os
-
 import numpy as np
 
-from glioma_seg.data.io import DataExtractor, DataSaver
+from glioma_seg.data.io import DataExtractor, DataSaver, list_subjects
 
 
 def calculate_crop_range(min_x, max_x, min_y, max_y, min_z, max_z):
@@ -72,7 +70,7 @@ class Preprocessor:
         sqs = {"flair": 0.0, "t1c": 0.0}
         cnts = {"flair": 0, "t1c": 0}
 
-        for subj in sorted(os.listdir(self.raw_dir)):
+        for subj in list_subjects(self.raw_dir):
             flair, t1c, label = self.extractor.load(subj)
 
             for vol in (flair, t1c):
@@ -114,7 +112,8 @@ class Preprocessor:
 
     def run(self, crop_bounds, stats):
         """Run the full preprocessing on all subjects using precomputed metadata."""
-        for idx, subj in enumerate(sorted(os.listdir(self.raw_dir))):
+        subjects = list_subjects(self.raw_dir)
+        for idx, subj in enumerate(subjects):
             flair, t1c, label = self.extractor.load(subj)
 
             cf = volume_crop(flair, *crop_bounds.values())
@@ -130,6 +129,6 @@ class Preprocessor:
             self.saver.save(idx, combined, refined)
 
         print(
-            f"All {len(os.listdir(self.raw_dir))} FLAIR and T1c images along with "
+            f"All {len(subjects)} FLAIR and T1c images along with "
             "their corresponding labels have been successfully processed and saved."
         )

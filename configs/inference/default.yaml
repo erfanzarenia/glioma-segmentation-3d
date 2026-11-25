@@ -4,7 +4,7 @@ checkpoint: checkpoints/model_epoch150.pt
 batch_size: 1
 num_workers: 2
 
-# Post-processing (placeholders — implement in glioma_seg.inference.postprocess).
+# Placeholders, not implemented yet: these two blocks are not read by any code.
 postprocess:
   enabled: false
   min_component_size: 50     # Remove ET components smaller than this many voxels.

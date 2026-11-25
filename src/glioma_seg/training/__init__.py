@@ -1,6 +1,7 @@
 """Training loop and data management."""
 
 from glioma_seg.training.data_manager import DataManager
+from glioma_seg.training.losses import build_loss
 from glioma_seg.training.trainer import Trainer
 
-__all__ = ["DataManager", "Trainer"]
+__all__ = ["DataManager", "Trainer", "build_loss"]
